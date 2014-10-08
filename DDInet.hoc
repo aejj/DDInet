@@ -12,10 +12,19 @@ nmdafactor=0.015
 threshg=-45
 threshm=-30
 
-objref ncigcmt, ncmtgca, ncmtgcb, net, g, b, nil, stim, mt, gc
+nmt = 50
+ngc = 400
 
-mt = new Mitral()
-gc = new GC()
+objref ncigcmt, ncmtgca, ncmtgcb, net, g, b, nil, stim, mt[nmt], gc[ngc]
+
+for i = 0, nmt-1 {
+	mt[i] = new Mitral()
+}
+
+for i = 0, ngc-1 {
+	gc[i] = new GC()
+}
+
 
 amp=0
 delay=20
