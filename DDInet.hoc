@@ -47,7 +47,6 @@ g.label(0.4,0.05,"GC dend")
 g.color(4)
 xpanel("",1)
 xbutton("control", "control()")
-xbutton("short dend", "rundend()")
 xbutton("Na shift", "runshift()")
 xpanel()
 b.intercept(0)
@@ -100,11 +99,4 @@ gc.somagc.sh_nax= 5
 gc.pridengc.L =500
 run()
 }
-
-proc rundend() {
-gc.somagc.sh_nax= 15
-gc.pridengc.L =300
-run()
-}
-
 
