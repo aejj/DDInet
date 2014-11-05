@@ -68,6 +68,7 @@ proc geometry() {local i
 
 proc memb() {
 	forall {insert pas}
+       ////soma
 	forsec somden {
 		insert nax  insert kamt insert kdrmt
 		ek = -90
@@ -77,6 +78,7 @@ proc memb() {
 		gbar_kamt = 0.004
 		}
 
+       //////resistence
 	forall {Ra = 150}
 
 	totarea=0
