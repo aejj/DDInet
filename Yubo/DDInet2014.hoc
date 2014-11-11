@@ -9,8 +9,8 @@ celsius=35
 tstop=500
 
 objref nconp[10], net, netp[10], g, b, synp, nil, stim, apc
-objref mt[10], gc[80], train, outfile, coeff[10], table
-objref nc[]
+objref mt[10], gc[30], train, outfile, coeff[10], index[14],table
+objref nc[450]
 
 strdef filename
 outfile = new File()
@@ -19,11 +19,18 @@ table = new Vector()
 
 for i=0,9 {
 mt[i] = new Mitral()
+}
+
+for i=0,9 {
 coeff[i] = new Vector()
 }
 
-for i=0,79 {
+for i=0,29 {
 gc[i] = new GC()
+}
+
+for i=0,13 {
+index[i] = new Vector()
 }
 
 ///////odor sensitivity of MCs
@@ -34,6 +41,14 @@ coeff[i].append(outfile.scanvar())
 }
 coeff[i].printf()
 }
+outfile.close()
+
+////get index number from index-table.
+outfile.ropen("index-table.txt")
+for j=0,13 {
+index[0].append(outfile.scanvar())
+}
+index[0].printf()
 outfile.close()
 
 cx=3
@@ -80,34 +95,64 @@ access mt[i].soma
 ////////////////// circuit definition  
 
 ///// gc <-> mt
-w0=1
+w0=1 
 w1=0.8
 w2=0.4
 
 nccount=0
-cluster=0
 
- for i=0,9 {
+ for i=0,2 {
    
-   for k=0,7{
+    for k=0,9{
     
-     for j=0,2 {
+     ////right side connections of gc[k]
+      for j=0,1 {
        nccount=nccount+1
-       gc[cluster+i].dend[j*2]   nc[nccount] = new NetCon(&v(1),mt[k+j].igp[?][j],-40,1,inh*1e-3)
-
-       nccount=nccount+1
-       mt[k+j].secden[1]  nc[nccount]= new NetCon(&v(0),gc[cluster+i].synmt[j],-40,1,synstr*nmdafactor)
+       gc[k+i*10].dend[j*2+2]   nc[nccount] = new NetCon(&v(1),mt[index[0].x[k+j+3]].igp[0][(j+1)+i*2],-40,1,w1*inh*1e-3)
 
        nccount=nccount+1
-       mt[k+j].secden[1]  nc[nccount]= new NetCon(&v(0),gc[cluster+i].sampa[j],-40,1,synstr*1e-3) 
+       mt[index[0].x[k+j+3]].secden[0]  nc[nccount]= new NetCon(&v(0),gc[k+i*10].synmt[j+1],-40,1,w1*synstr*nmdafactor)
 
+       nccount=nccount+1
+       mt[index[0].x[k+j+3]].secden[0]  nc[nccount]= new NetCon(&v(0),gc[k+i*10].sampa[j+1],-40,1,w1*synstr*1e-3)
 
+                 }
+
+     
+     /////left side connections of gc[k] 
+       for j=0,1 {
+       nccount=nccount+1
+       gc[k+i*10].dend[j*2+6]   nc[nccount] = new NetCon(&v(1),mt[index[0].x[k+j+1]].igp[1][(j+1)+i*2],-40,1,w2*inh*1e-3)
+
+       nccount=nccount+1
+       mt[index[0].x[k+j+1]].secden[1]  nc[nccount]= new NetCon(&v(0),gc[k+i*10].synmt[j+3],-40,1,w2*synstr*nmdafactor)
+
+       nccount=nccount+1
+       mt[index[0].x[k+j+1]].secden[1]  nc[nccount]= new NetCon(&v(0),gc[k+i*10].sampa[j+3],-40,1,w2*synstr*1e-3) 
+
+                }
+        
+  
               }
+           }
+    
+    ////middle connections of gc[k]
+     for i=0,1 {
 
-            }
+      for k=0,9 {
+       nccount=nccount+1
+       gc[k+10*i].dend[0]   nc[nccount] = new NetCon(&v(1),mt[index[0].x[k+3]].igp[i][0],-40,1,w0*inh*1e-3)
 
-  cluster=cluster+8
-          }
+       nccount=nccount+1
+       mt[index[0].x[j+3]].secden[i]  nc[nccount]= new NetCon(&v(0),gc[k+10*i].synmt[0],-40,1,w0*synstr*nmdafactor)
+
+       nccount=nccount+1
+       mt[index[0].x[j+3]].secden[i]  nc[nccount]= new NetCon(&v(0),gc[k+10*i].sampa[0],-40,1,w0*synstr*1e-3)
+
+                 }
+              }
+     /////gc[20]-gc[30] don't have middle connections, or they can all be connected with igp[0 or 1][7] of all MTs.
+
 
 ////////////////// end circuit definition
 

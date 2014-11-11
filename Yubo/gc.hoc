@@ -2,9 +2,9 @@ begintemplate GC
 
 public somagc, dend, synmt, priden, sampa, priden2
 
-create somagc, priden2[3], dend[6], priden
+create somagc, priden2[3], dend[10], priden
 
-objref synmt[3], sampa[3]
+objref synmt[5], sampa[5]
 
 proc init() {
 
@@ -24,9 +24,15 @@ proc topol() {local i
 	connect dend[0](0), dend[1](1)
 	connect dend[1](0), priden2[0](0.5)
 	connect dend[2](0), dend[3](1)
-	connect dend[3](0), priden2[0](0.6)
+	connect dend[3](0), priden2[1](0.6)
 	connect dend[4](0), dend[5](1)
-	connect dend[5](0), priden2[0](0.4)
+	connect dend[5](0), priden2[1](0.4)
+       connect dend[6](0), dend[7](1)
+	connect dend[7](0), priden2[2](0.6)
+	connect dend[8](0), dend[9](1)
+	connect dend[9](0), priden2[2](0.4)
+	
+
 }
 
 proc segments() {local i
@@ -40,9 +46,13 @@ proc geometry() {local i
 	dend[0] { L=1  diam=1}
 	dend[2] { L=1  diam=1}
 	dend[4] { L=1  diam=1}
+       dend[6] { L=1  diam=1}
+	dend[8] { L=1  diam=1}
 	dend[1] { L=2  diam=.2}
 	dend[3] { L=2  diam=.2}
 	dend[5] { L=2  diam=.2}
+       dend[7] { L=2  diam=.2}
+	dend[9] { L=2  diam=.2}
 	priden {L=150 diam=.5}
 	for i=0, 2 {priden2[i] {L=100 diam=.4}}
 	define_shape()
@@ -94,6 +104,19 @@ dend[4] {
 	sampa[2] = new ExpSyn(1)
 	sampa[2].e=0
 	sampa[2].tau=3
+	}
+dend[6] {
+	synmt[3] = new nmdanet(1) 
+	sampa[3] = new ExpSyn(1)
+	sampa[3].e=0
+	sampa[3].tau=3
+	}
+
+dend[8] {
+	synmt[4] = new nmdanet(1) 
+	sampa[4] = new ExpSyn(1)
+	sampa[4].e=0
+	sampa[4].tau=3
 	}
 }
 
