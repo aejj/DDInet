@@ -12,6 +12,11 @@ objref nconp[3], net, netp[3], g, b, synp, nil, stim, apc
 objref mt[3], gc[3], train, outfile, coeff[3], table
 objref nc[27]
 
+objref rect, recv, savdata
+rect = new Vector()
+recv = new Vector()
+savdata = new File()
+
 strdef filename
 outfile = new File()
 
@@ -139,7 +144,29 @@ proc run() {
 	for i=0, 2 {
 	nconp[i].weight=coeff[i].x[cx-3]*1.e-3
 	print i, nconp[i].weight
-}
+	}
 	stdinit()
 	continuerun(tstop)
+
+	//// record voltage trace and time into vectors	
+	recv.record(&mt[2].soma.v(0.5))
+	rect.record(&t)
+	
+	rect.printf()
+
+	//// open new file
+	savdata.wopen("mt2.dat")
+	
+	//// print titles of columns to file
+	savdata.printf("t mt[2].soma.v(0.5)\n")
+	savdata.printf("%d\n",rect.size())
+	
+	//// print data to file
+	for i=0,rect.size()-1 {
+	    savdata.printf("%g %g\n", rect.x(i), recv.x(i))
+	}
+	
+	savdata.close()
+
 }
+
