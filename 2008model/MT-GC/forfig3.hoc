@@ -12,11 +12,6 @@ objref nconp[3], net, netp[3], g, b, synp, nil, stim, apc
 objref mt[3], gc[3], train, outfile, coeff[3], table
 objref nc[27]
 
-objref rect, recv, savdata
-rect = new Vector()
-recv = new Vector()
-savdata = new File()
-
 strdef filename
 outfile = new File()
 
@@ -27,6 +22,16 @@ mt[i] = new Mitral()
 gc[i] = new GC()
 coeff[i] = new Vector()
 }
+
+objref rect, recv, savdata
+rect = new Vector()
+recv = new Vector()
+savdata = new File()
+
+//// record voltage trace and time into vectors	
+recv.record(&mt[2].soma.v(0.5))
+rect.record(&t)
+
 
 outfile.ropen("coeff-table.txt")
 for i=0, 2 {
@@ -148,9 +153,6 @@ proc run() {
 	stdinit()
 	continuerun(tstop)
 
-	//// record voltage trace and time into vectors	
-	recv.record(&mt[2].soma.v(0.5))
-	rect.record(&t)
 	
 	rect.printf()
 
