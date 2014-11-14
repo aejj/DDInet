@@ -1,6 +1,6 @@
 begintemplate Mitral
 
-public soma, priden, secden, tuftden, hillock, initialseg
+public soma, priden, secden, tuftden, hillock, initialseg, count
 public dendritic, somatic, second, somden, synodor, isynpg
 public dampa, igp
 
