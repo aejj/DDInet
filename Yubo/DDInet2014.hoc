@@ -33,6 +33,28 @@ for i=0,13 {
 index[i] = new Vector()
 }
 
+
+//// record voltage trace and time into vectors	
+objref rect,savdatat,savdatamt,recv,tempmatrix,recvtemp,recvtemp2
+
+recv=new List()
+recvtemp2=new Vector()
+tempmatrix=new Matrix()
+rect = new Vector()
+savdatat = new File()
+savdatamt=new File()
+
+rect.record(&t)
+
+tempmatrix.resize(10000,10)
+
+
+for i=0,9{
+  recvtemp=new Vector()
+  recvtemp.record(&mt[i].soma.v(0.5))
+  recv.append(recvtemp)
+}
+
 ///////odor sensitivity of MCs
 outfile.ropen("coeff-table.txt")
 for i=0,9{
@@ -188,4 +210,21 @@ proc run() {
 }
 	stdinit()
 	continuerun(tstop)
+
+//// open new file
+	savdatamt.wopen("mt.dat")
+	
+	//// print titles of columns to file
+	savdatamt.printf("mt\n")
+	savdatamt.printf("%d\n",rect.size())
+	
+	//// print data to file
+	
+     for i=0,9{
+      recvtemp2=recv.o(i)
+      tempmatrix.setcol(i,recvtemp2) 
+              }
+
+     tempmatrix.fprint(savdatamt, " %g")
+     savdatamt.close()
 }
