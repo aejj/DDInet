@@ -6,7 +6,7 @@ cvode.active(1)
 Vrest = -65
 dt = 1
 celsius=35
-tstop=500
+tstop=1500
 
 objref nconp[10], net, netp[10], g, b, synp, nil, stim, apc
 objref mt[10], gc[30], train, outfile, coeff[10], index[14],table
@@ -34,7 +34,7 @@ index[i] = new Vector()
 }
 
 
-//// record voltage trace and time into vectors	
+//// record mt voltage trace and time into vectors	
 objref rect,savdatat,savdatamt,recv,tempmatrix,recvtemp,recvtemp2
 
 recv=new List()
@@ -46,7 +46,8 @@ savdatamt=new File()
 
 rect.record(&t)
 
-tempmatrix.resize(10000,10)
+/////tempmatrix includes time vector
+tempmatrix.resize(10000,10+1)
 
 
 for i=0,9{
@@ -54,6 +55,27 @@ for i=0,9{
   recvtemp.record(&mt[i].soma.v(0.5))
   recv.append(recvtemp)
 }
+
+//// record gc voltage trace and time into vectors	
+objref savdatatgc,savdatagc,recvgc,tempmatrixgc,recvtempgc,recvtempgc2
+
+recvgc=new List()
+recvtempgc2=new Vector()
+tempmatrixgc=new Matrix()
+savdatagc = new File()
+savdatatgc=new File()
+
+
+////////tempmatrixgc includes time vector
+tempmatrixgc.resize(10000,30+1)
+
+
+for i=0,29{
+  recvtempgc=new Vector()
+  recvtempgc.record(&gc[i].somagc.v(0.5))
+  recvgc.append(recvtempgc)
+}
+
 
 ///////odor sensitivity of MCs
 outfile.ropen("coeff-table.txt")
@@ -104,8 +126,8 @@ for i=0, 9 {
 access mt[i].soma
 	distance()
 	netp[i] = new NetStim(0)
-      ////trigger spike (first spike), then the average input current to MC.
-	netp[i].number=1
+      ////trigger spike (first spike), then the average input current to MC.Try change the numbers of spikes or the interval of each spike.
+	netp[i].number=3
 	netp[i].interval=500
 	netp[i].noise=0
       /////starting time 2ms.
@@ -219,12 +241,36 @@ proc run() {
 	savdatamt.printf("%d\n",rect.size())
 	
 	//// print data to file
-	
+
+	///////o():return the object at index i
+
+      tempmatrix.setcol(0,rect)
      for i=0,9{
-      recvtemp2=recv.o(i)
-      tempmatrix.setcol(i,recvtemp2) 
+      recvtemp2=recv.o(i)      
+      tempmatrix.setcol(i+1,recvtemp2) 
               }
 
      tempmatrix.fprint(savdatamt, " %g")
      savdatamt.close()
+
+//// open new file
+	savdatagc.wopen("gc.dat")
+	
+	//// print titles of columns to file
+	savdatagc.printf("gc\n")
+	savdatagc.printf("%d\n",rect.size())
+	
+	//// print data to file
+	
+
+       tempmatrixgc.setcol(0,rect)
+
+     for i=0,29{
+      recvtempgc2=recvgc.o(i)
+      tempmatrixgc.setcol(i+1,recvtempgc2) 
+              }
+
+     tempmatrixgc.fprint(savdatagc, " %g")
+     savdatagc.close()
+
 }

@@ -101,6 +101,7 @@ proc memb() {
 	}       
 
   
+///diff input currents?
 	tuftden {
 	synodor = new Exp2Syn(.2)
 	synodor.e=0
