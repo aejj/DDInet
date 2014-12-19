@@ -64,6 +64,7 @@ proc memb() {
 	forall {
 		insert pas 
 		insert kamt gbar_kamt=0.008 ek=-90
+          ////default threshold =15;try 5,10,15,20
 		insert nax gbar_nax=0.02 sh_nax=15 ena=60
 		Ra = 80
 		cm = 1
