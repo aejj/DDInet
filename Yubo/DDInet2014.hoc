@@ -8,16 +8,23 @@ dt = 1
 celsius=35
 tstop=1500
 
-objref nconp[10], net, netp[10], g, b, synp, nil, stim, apc
-objref mt[10], gc[30], train, outfile, coeff[10], index[14],table
-objref nc[450]
+mtnum=10
+gcnum=30
+gcconnection=5  //.the number of mt-gc connections of a GC cell
+mtconnection=gcnum*gcconnection/mtnum
 
-strdef filename
+objref nconp[mtnum], net, netp[mtnum], g, b, synp, nil, stim, apc
+objref mt[mtnum], gc[gcnum], train, outfile, coeff[10], index[14],table
+objref nc[gcnum*gcconnection*3]
+
+strdef extension
+extension = "dat" //.dat extension for data files
+
 outfile = new File()
 
 table = new Vector()
 
-for i=0,9 {
+for i=0,mtnum-1 {
 mt[i] = new Mitral()
 }
 
@@ -25,7 +32,7 @@ for i=0,9 {
 coeff[i] = new Vector()
 }
 
-for i=0,29 {
+for i=0,gcnum-1 {
 gc[i] = new GC()
 }
 
@@ -36,6 +43,8 @@ index[i] = new Vector()
 
 //// record mt voltage trace and time into vectors	
 objref rect,savdatat,savdatamt,recv,tempmatrix,recvtemp,recvtemp2
+strdef mtfilename, mtbasename
+mtbasename = "mt_O"
 
 recv=new List()
 recvtemp2=new Vector()
@@ -47,10 +56,10 @@ savdatamt=new File()
 rect.record(&t)
 
 /////tempmatrix includes time vector
-tempmatrix.resize(10000,10+1)
+tempmatrix.resize(50000,mtnum+1)
 
 
-for i=0,9{
+for i=0,mtnum-1{
   recvtemp=new Vector()
   recvtemp.record(&mt[i].soma.v(0.5))
   recv.append(recvtemp)
@@ -58,6 +67,8 @@ for i=0,9{
 
 //// record gc voltage trace and time into vectors	
 objref savdatatgc,savdatagc,recvgc,tempmatrixgc,recvtempgc,recvtempgc2
+strdef gcfilename, gcbasename
+gcbasename = "gc_O"
 
 recvgc=new List()
 recvtempgc2=new Vector()
@@ -67,10 +78,10 @@ savdatatgc=new File()
 
 
 ////////tempmatrixgc includes time vector
-tempmatrixgc.resize(10000,30+1)
+tempmatrixgc.resize(50000,gcnum+1)
 
 
-for i=0,29{
+for i=0,gcnum-1{
   recvtempgc=new Vector()
   recvtempgc.record(&gc[i].somagc.v(0.5))
   recvgc.append(recvtempgc)
@@ -78,7 +89,7 @@ for i=0,29{
 
 
 ///////odor sensitivity of MCs
-outfile.ropen("coeff-table.txt")
+outfile.ropen("CoeffTable_9OD_10MC.txt")
 for i=0,9{
 for j=0,8 {
 coeff[i].append(outfile.scanvar())
@@ -95,7 +106,7 @@ index[0].append(outfile.scanvar())
 index[0].printf()
 outfile.close()
 
-cx=3
+cx=1
 
 weight=.1
 amp=.03
@@ -122,12 +133,13 @@ b.intercept(0)
 b.map()
 
 ///////////NetStim: presynaptic stimulus on MC, spike train. 
-for i=0, 9 {
+for i=0, mtnum-1 {
 access mt[i].soma
 	distance()
 	netp[i] = new NetStim(0)
       ////trigger spike (first spike), then the average input current to MC.Try change the numbers of spikes or the interval of each spike.
-	netp[i].number=3
+
+	netp[i].number=1
 	netp[i].interval=500
 	netp[i].noise=0
       /////starting time 2ms.
@@ -147,18 +159,18 @@ nccount=0
 
  for i=0,2 {
    
-    for k=0,9{
+    for k=0,mtnum-1{
     
      ////right side connections of gc[k]
       for j=0,1 {
        nccount=nccount+1
-       gc[k+i*10].dend[j*2+2]   nc[nccount] = new NetCon(&v(1),mt[index[0].x[k+j+3]].igp[0][(j+1)+i*2],-40,1,w1*inh*1e-3)
+       gc[k+i*mtnum].dend[j*2+2]   nc[nccount] = new NetCon(&v(1),mt[index[0].x[k+j+3]].igp[0][(j+1)+i*2],-40,1,w1*inh*1e-3)
 
        nccount=nccount+1
-       mt[index[0].x[k+j+3]].secden[0]  nc[nccount]= new NetCon(&v(0),gc[k+i*10].synmt[j+1],-40,1,w1*synstr*nmdafactor)
+       mt[index[0].x[k+j+3]].secden[0]  nc[nccount]= new NetCon(&v(0),gc[k+i*mtnum].synmt[j+1],-40,1,w1*synstr*nmdafactor)
 
        nccount=nccount+1
-       mt[index[0].x[k+j+3]].secden[0]  nc[nccount]= new NetCon(&v(0),gc[k+i*10].sampa[j+1],-40,1,w1*synstr*1e-3)
+       mt[index[0].x[k+j+3]].secden[0]  nc[nccount]= new NetCon(&v(0),gc[k+i*mtnum].sampa[j+1],-40,1,w1*synstr*1e-3)
 
                  }
 
@@ -166,13 +178,13 @@ nccount=0
      /////left side connections of gc[k] 
        for j=0,1 {
        nccount=nccount+1
-       gc[k+i*10].dend[j*2+6]   nc[nccount] = new NetCon(&v(1),mt[index[0].x[k+j+1]].igp[1][(j+1)+i*2],-40,1,w2*inh*1e-3)
+       gc[k+i*mtnum].dend[j*2+6]   nc[nccount] = new NetCon(&v(1),mt[index[0].x[k+j+1]].igp[1][(j+1)+i*2],-40,1,w2*inh*1e-3)
 
        nccount=nccount+1
-       mt[index[0].x[k+j+1]].secden[1]  nc[nccount]= new NetCon(&v(0),gc[k+i*10].synmt[j+3],-40,1,w2*synstr*nmdafactor)
+       mt[index[0].x[k+j+1]].secden[1]  nc[nccount]= new NetCon(&v(0),gc[k+i*mtnum].synmt[j+3],-40,1,w2*synstr*nmdafactor)
 
        nccount=nccount+1
-       mt[index[0].x[k+j+1]].secden[1]  nc[nccount]= new NetCon(&v(0),gc[k+i*10].sampa[j+3],-40,1,w2*synstr*1e-3) 
+       mt[index[0].x[k+j+1]].secden[1]  nc[nccount]= new NetCon(&v(0),gc[k+i*mtnum].sampa[j+3],-40,1,w2*synstr*1e-3) 
 
                 }
         
@@ -183,15 +195,15 @@ nccount=0
     ////middle connections of gc[k]
      for i=0,1 {
 
-      for k=0,9 {
+      for k=0,mtnum-1 {
        nccount=nccount+1
-       gc[k+10*i].dend[0]   nc[nccount] = new NetCon(&v(1),mt[index[0].x[k+3]].igp[i][0],-40,1,w0*inh*1e-3)
+       gc[k+mtnum*i].dend[0]   nc[nccount] = new NetCon(&v(1),mt[index[0].x[k+3]].igp[i][0],-40,1,w0*inh*1e-3)
 
        nccount=nccount+1
-       mt[index[0].x[j+3]].secden[i]  nc[nccount]= new NetCon(&v(0),gc[k+10*i].synmt[0],-40,1,w0*synstr*nmdafactor)
+       mt[index[0].x[j+3]].secden[i]  nc[nccount]= new NetCon(&v(0),gc[k+mtnum*i].synmt[0],-40,1,w0*synstr*nmdafactor)
 
        nccount=nccount+1
-       mt[index[0].x[j+3]].secden[i]  nc[nccount]= new NetCon(&v(0),gc[k+10*i].sampa[0],-40,1,w0*synstr*1e-3)
+       mt[index[0].x[j+3]].secden[i]  nc[nccount]= new NetCon(&v(0),gc[k+mtnum*i].sampa[0],-40,1,w0*synstr*1e-3)
 
                  }
               }
@@ -227,14 +239,15 @@ proc advance() {
 ////// x[i], returns the value for the index i
 proc run() {
 	for i=0, 9 {
-	nconp[i].weight=coeff[i].x[cx-3]*1.e-3
+	nconp[i].weight=coeff[i].x[cx-1]*1.e-3
 	print i, nconp[i].weight
 }
 	stdinit()
 	continuerun(tstop)
 
-//// open new file
-	savdatamt.wopen("mt.dat")
+//// Concatenate file name and open file for writing data
+	sprint(mtfilename, "%s%d.%s", mtbasename, cx, extension)
+	savdatamt.wopen(mtfilename)
 	
 	//// print titles of columns to file
 	savdatamt.printf("mt\n")
@@ -245,7 +258,7 @@ proc run() {
 	///////o():return the object at index i
 
       tempmatrix.setcol(0,rect)
-     for i=0,9{
+     for i=0,mtnum-1{
       recvtemp2=recv.o(i)      
       tempmatrix.setcol(i+1,recvtemp2) 
               }
@@ -253,8 +266,9 @@ proc run() {
      tempmatrix.fprint(savdatamt, " %g")
      savdatamt.close()
 
-//// open new file
-	savdatagc.wopen("gc.dat")
+//// Concatenate file name and open file for writing data
+	sprint(gcfilename, "%s%d.%s", gcbasename, cx, extension)
+	savdatagc.wopen(gcfilename)
 	
 	//// print titles of columns to file
 	savdatagc.printf("gc\n")
@@ -265,7 +279,7 @@ proc run() {
 
        tempmatrixgc.setcol(0,rect)
 
-     for i=0,29{
+     for i=0,gcnum-1{
       recvtempgc2=recvgc.o(i)
       tempmatrixgc.setcol(i+1,recvtempgc2) 
               }

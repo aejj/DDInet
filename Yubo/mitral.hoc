@@ -3,14 +3,15 @@ begintemplate Mitral
 public soma, priden, secden, tuftden, hillock, initialseg
 public dendritic, somatic, second, somden, synodor, isynpg
 public dampa, igp
-
+public sypsecden
 
 create soma, priden, secden[2], tuftden, hillock, initialseg
 
 forall {Ra = 150}
+sypsecden=int(15/2)
 
 objref dendritic, somatic, somden, synodor
-objref isynpg, dampa, igp[2][8]
+objref isynpg, dampa, igp[2][sypsecden]
 
 proc init() {
 
@@ -111,13 +112,28 @@ proc memb() {
 }
 
 for i=0, 1 secden[i] {
-	for j=0, 7 {
-           /// Here I change "Exp2Syn(j*.4) to Exp2Syn(j*.1), will the synapses be too crowded?
-		igp[i][j] = new Exp2Syn(j*.1)
+	for j=0,sypsecden/3-1 {
+		igp[i][j] = new Exp2Syn(j*.001)
 		igp[i][j].e=-80
 		igp[i][j].tau1 = 1
 		igp[i][j].tau2 = 200
 	}
+
+       for j=sypsecden/3,2*sypsecden/3-1 {
+		igp[i][j] = new Exp2Syn(0.4+j*.001)
+		igp[i][j].e=-80
+		igp[i][j].tau1 = 1
+		igp[i][j].tau2 = 200
+	}
+
+       for j=2*sypsecden/3,sypsecden {
+		igp[i][j] = new Exp2Syn(0.8+j*.001)
+		igp[i][j].e=-80
+		igp[i][j].tau1 = 1
+		igp[i][j].tau2 = 200
+	}
+
+
 }
 
 }

@@ -1,0 +1,67 @@
+str=[];
+for i=1:30; str=[str,'%g '];end
+
+rect = new Vector()
+recv = new Vector()
+
+recv.record(&mt[1].soma.v(0.5))
+rect.record(&t)
+
+recv.printf()
+
+objref savv, savt
+
+
+savv = new File()
+savt = new File()
+
+
+savv.wopen("cell3somav.dat")
+savt.wopen("cell3somat.dat")
+
+
+recv.printf(savv)
+rect.printf(savt)
+
+
+savv.close()
+savt.close()
+
+/////
+objref savdata
+savdata = new File()
+savdata.wopen("cell3somav.dat")
+
+savdata.printf("t mt[1].soma.v(0.5)\n")
+
+
+tempmatrix = new Matrix()
+tempmatrix.resize(recv.size(),2)
+tempmatrix.setcol(0, rect)
+tempmatrix.setcol(1, recv)
+tempmatrix.fprint(savdata, " %g")
+savdata.close()
+
+///////////////////////
+
+objref timevec, idvec, recncs, tobj, nil,h
+timevec = new Vector()
+idvec = new Vector()
+recncs = new List()
+for i=0,mt.count()-1 {
+  mt.object(i).soma tobj = new NetCon(&v(0.5), nil)
+  tobj.record(timevec, idvec, i+1) // so all the spike rasters lie above the x axis
+  recncs.append(tobj)
+}
+objref tobj // so we don't accidentally mess up the last NetCon
+
+objref h
+proc plotraster() {
+  h = new Graph()
+  idvec.mark(h, timevec, "|")
+}
+
+proc myrun() {
+  run()
+  plotraster()
+}
