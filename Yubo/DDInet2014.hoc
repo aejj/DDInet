@@ -20,6 +20,12 @@ objref nc[gcnum*gcconnection*3]
 strdef extension
 extension = "dat" //.dat extension for data files
 
+<<<<<<< HEAD
+=======
+strdef extension
+extension = "dat" //.dat extension for data files
+
+>>>>>>> aDDInet/master
 outfile = new File()
 
 table = new Vector()
@@ -56,7 +62,11 @@ savdatamt=new File()
 rect.record(&t)
 
 /////tempmatrix includes time vector
+<<<<<<< HEAD
 tempmatrix.resize(50000,mtnum+1)
+=======
+tempmatrix.resize(50000,10+1)
+>>>>>>> aDDInet/master
 
 
 for i=0,mtnum-1{
@@ -78,7 +88,11 @@ savdatatgc=new File()
 
 
 ////////tempmatrixgc includes time vector
+<<<<<<< HEAD
 tempmatrixgc.resize(50000,gcnum+1)
+=======
+tempmatrixgc.resize(50000,30+1)
+>>>>>>> aDDInet/master
 
 
 for i=0,gcnum-1{
@@ -139,7 +153,11 @@ access mt[i].soma
 	netp[i] = new NetStim(0)
       ////trigger spike (first spike), then the average input current to MC.Try change the numbers of spikes or the interval of each spike.
 
+<<<<<<< HEAD
 	netp[i].number=1
+=======
+	netp[i].number=3
+>>>>>>> aDDInet/master
 	netp[i].interval=500
 	netp[i].noise=0
       /////starting time 2ms.
